@@ -1,56 +1,29 @@
-import React from 'react';
-import AddProduct from '../../Components/Form/AddProduct';
-import useAsyncGetData from '../../Hook/useAsyncGetData';
-import useAsyncPostData from '../../Hook/useAsyncPostData';
-
-// Types
-type ProductType = {
-  title: string;
-  id: number;
-  description: string;
-};
-
-const HomePage: React.FC = () => {
-  // UseAsyncGetData
-  const { data, loading, error, setData } = useAsyncGetData<ProductType[]>({
-    api_url: 'http://localhost:5007',
-    path: 'product',
-  });
-  // UseAsyncPostData
-  const { asyncPostData } = useAsyncPostData<ProductType[]>({
-    setData: setData,
-  });
-  // Form Submit
-  const handleAddProduct = async ({
-    title,
-    description,
-  }: Partial<ProductType>): Promise<void> => {
-    await asyncPostData({
-      api_url: 'http://localhost:5007',
-      path: 'product',
-      data: { title, description },
-    });
-  };
-
-  if (loading) return <>loading...</>;
-  if (error) return <>error</>;
-
+import useGeoLocation from '../../Hook/useGeoLocation';
+const HomePage = () => {
+  // Custom Hook useGeoLocation
+  const { error, handleGetPosition, load, post, countClick } = useGeoLocation();
+  // Error Message
+  if (error) return <>{error}</>;
+  // Return JSX
   return (
-    <section className="flex flex-col gap-4 m-3 mx-auto container">
-      <AddProduct handleAddProduct={handleAddProduct} />
-      <div className="flex flex-col gap-3">
-        {data?.map((product) => (
-          <section
-            key={product.id}
-            className="p-5 rounded-lg bg-gray-200 capitalize"
-          >
-            {product.id}.{' '}
-            <span className="text-purple-500">{product.title}</span> -{' '}
-            {product.description}
-          </section>
-        ))}
-      </div>
-    </section>
+    <div className="flex flex-row items-center gap-5 mx-auto container m-2">
+      {/* Button To Click Request */}
+      <button
+        onClick={handleGetPosition}
+        className="px-4  text-xl hover:bg-orange-500 transition-all ease-in-out duration-150 py-2 rounded-lg bg-orange-400 capitalize"
+      >
+        click to get location
+      </button>
+      {/* Render Post Lat , long */}
+      <p className="p-2 rounded-lg bg-gray-200">
+        {load
+          ? 'wait to get position...'
+          : post.lat || post.long
+          ? `location : lat : ${post.lat}- long : ${post.long}`
+          : 'no set location'}
+      </p>
+      <p>your requested time {countClick}</p>
+    </div>
   );
 };
 
